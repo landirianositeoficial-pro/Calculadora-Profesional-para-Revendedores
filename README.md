@@ -15,6 +15,8 @@ Software de cotización profesional multicambiario diseñado para revendedores d
 
 ---
 
+PRUEBA LA CALCULADORA AQUI: https://n9.cl/8cxae
+
 ## Inicio Rápido
 
 ```
