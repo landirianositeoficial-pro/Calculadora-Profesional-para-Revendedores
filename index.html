@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Calculadora Profesional para Revendedores v4.0 — Motor de cotización multicambiario con panel editable de precios, módulo de promociones, logística y tablero contable en tiempo real."/>
+<title>Calculadora Profesional para Revendedores v4.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#111111;
+  --card:#1C1C1C;
+  --border:#2D2D2D;
+  --accent:#D35400;
+  --accent-hover:#E8600A;
+  --accent-dim:rgba(211,84,0,.12);
+  --text:#F0F0F0;
+  --text-muted:#888;
+  --text-dim:#555;
+  --success:#27AE60;
+  --info:#2980B9;
+  --warn:#E67E22;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',sans-serif;
+  --radius:10px;
+  --shadow:0 4px 24px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* ── HEADER ── */
+header{
+  background:linear-gradient(135deg,#0a0a0a 0%,#1a1a1a 50%,#0d0d0d 100%);
+  border-bottom:1px solid var(--border);
+  padding:24px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(12px);
+}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-icon{
+  width:44px;height:44px;
+  background:linear-gradient(135deg,var(--accent),#B7420A);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;font-weight:900;color:#fff;
+  box-shadow:0 0 20px rgba(211,84,0,.35);
+}
+.brand-text h1{font-size:1.1rem;font-weight:700;letter-spacing:.5px}
+.brand-text small{font-size:.7rem;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase}
+.version-badge{
+  background:var(--accent-dim);border:1px solid var(--accent);
+  color:var(--accent);font-size:.65rem;font-weight:700;
+  padding:4px 10px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;
+}
+
+/* ── LAYOUT ── */
+main{max-width:1400px;margin:0 auto;padding:28px 20px 60px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* ── CARDS ── */
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:22px 24px;
+  box-shadow:var(--shadow);
+}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);
+}
+.card-title{font-size:.8rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted)}
+.card-title span{color:var(--accent)}
+.collapse-btn{
+  background:none;border:1px solid var(--border);color:var(--text-muted);
+  padding:4px 12px;border-radius:6px;cursor:pointer;font-size:.75rem;
+  transition:all .2s;font-family:var(--sans);
+}
+.collapse-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ── SECTION DIVIDERS ── */
+.section-label{
+  font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--accent);margin:28px 0 12px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── INPUTS ── */
+label{display:block;font-size:.72rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;letter-spacing:.5px}
+input[type=number],input[type=text],select{
+  width:100%;background:#141414;border:1px solid var(--border);
+  color:var(--text);padding:10px 13px;border-radius:7px;
+  font-size:.88rem;font-family:var(--sans);outline:none;
+  transition:border-color .2s,box-shadow .2s;
+  -moz-appearance:textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(211,84,0,.15)}
+input:hover,select:hover{border-color:#444}
+select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;margin-right:8px}
+
+/* ── FX PANEL ── */
+.fx-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:700px){.fx-grid{grid-template-columns:1fr}}
+.fx-item{position:relative}
+.fx-prefix{
+  position:absolute;left:12px;top:50%;transform:translateY(-50%);
+  font-size:.75rem;font-weight:700;color:var(--accent);pointer-events:none;margin-top:10px;
+}
+.fx-item input{padding-left:42px}
+.fx-badge{
+  display:inline-block;font-size:.6rem;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;padding:2px 8px;border-radius:20px;margin-bottom:7px;
+}
+.fx-badge.usd{background:rgba(39,174,96,.15);color:#27AE60;border:1px solid rgba(39,174,96,.3)}
+.fx-badge.eur{background:rgba(41,128,185,.15);color:#2980B9;border:1px solid rgba(41,128,185,.3)}
+.fx-badge.p2p{background:rgba(243,156,18,.15);color:#F39C12;border:1px solid rgba(243,156,18,.3)}
+
+/* ── PRICE MATRIX TABLE ── */
+.matrix-wrap{overflow-x:auto}
+.matrix-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.matrix-table th{
+  padding:10px 12px;text-align:left;font-size:.65rem;letter-spacing:1.2px;
+  text-transform:uppercase;color:var(--text-muted);border-bottom:2px solid var(--border);
+  white-space:nowrap;
+}
+.matrix-table td{padding:7px 8px;border-bottom:1px solid rgba(45,45,45,.6);vertical-align:middle}
+.matrix-table tr:last-child td{border-bottom:none}
+.matrix-table tr:hover td{background:rgba(255,255,255,.02)}
+.prod-name{font-weight:500;color:var(--text);white-space:nowrap;font-size:.8rem}
+.price-input{
+  width:88px;background:#0e0e0e;border:1px solid var(--border);
+  color:var(--text);padding:6px 9px;border-radius:6px;
+  font-size:.82rem;font-family:var(--mono);outline:none;
+  transition:border-color .2s;-moz-appearance:textfield;
+}
+.price-input::-webkit-inner-spin-button,.price-input::-webkit-outer-spin-button{-webkit-appearance:none}
+.price-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(211,84,0,.12)}
+.col-prov input{color:#E74C3C}
+.col-detal input{color:#27AE60}
+.col-mayor input{color:#3498DB}
+
+/* ── QUOTE ROWS ── */
+.quote-table{width:100%;border-collapse:collapse;font-size:.83rem}
+.quote-table th{
+  padding:9px 10px;font-size:.63rem;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-muted);border-bottom:2px solid var(--border);white-space:nowrap;text-align:left;
+}
+.quote-table td{padding:7px 6px;border-bottom:1px solid rgba(45,45,45,.5);vertical-align:middle}
+.quote-table tr.row-total td{border-top:2px solid var(--border);border-bottom:none;padding-top:10px}
+.q-select,.q-input-sm{
+  background:#0e0e0e;border:1px solid var(--border);color:var(--text);
+  padding:7px 9px;border-radius:6px;font-size:.8rem;font-family:var(--sans);outline:none;
+  transition:border-color .2s;
+}
+.q-select{min-width:190px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 10 7'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.q-input-sm{width:68px;-moz-appearance:textfield;text-align:center}
+.q-input-sm::-webkit-inner-spin-button,.q-input-sm::-webkit-outer-spin-button{-webkit-appearance:none}
+.q-select:focus,.q-input-sm:focus{border-color:var(--accent)}
+.q-mode-badge{font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.q-mode-badge.detal{background:rgba(39,174,96,.15);color:#27AE60;border:1px solid rgba(39,174,96,.25)}
+.q-mode-badge.mayor{background:rgba(52,152,219,.15);color:#3498DB;border:1px solid rgba(52,152,219,.25)}
+.btn-icon{
+  background:none;border:1px solid var(--border);color:var(--text-muted);
+  width:32px;height:32px;border-radius:6px;cursor:pointer;font-size:1rem;
+  display:flex;align-items:center;justify-content:center;transition:all .2s;
+  flex-shrink:0;
+}
+.btn-icon:hover.del{border-color:#E74C3C;color:#E74C3C;background:rgba(231,76,60,.08)}
+.btn-icon:hover.clone{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+/* ── BUTTONS ── */
+.btn{
+  padding:11px 22px;border-radius:8px;font-size:.83rem;font-weight:600;
+  cursor:pointer;border:none;font-family:var(--sans);letter-spacing:.3px;
+  transition:all .2s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#B7420A);color:#fff;box-shadow:0 4px 16px rgba(211,84,0,.3)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(211,84,0,.45)}
+.btn-secondary{background:#252525;color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:rgba(231,76,60,.12);color:#E74C3C;border:1px solid rgba(231,76,60,.3)}
+.btn-danger:hover{background:rgba(231,76,60,.2);border-color:#E74C3C}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+
+/* ── PROMO MODULE ── */
+.promo-box{
+  background:#141414;border:1px solid var(--border);border-radius:8px;
+  padding:16px;margin-top:16px;
+}
+.promo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.promo-option{
+  display:flex;align-items:center;gap:8px;font-size:.82rem;
+  background:#1a1a1a;border:1px solid var(--border);border-radius:7px;
+  padding:8px 14px;cursor:pointer;transition:all .2s;
+}
+.promo-option.active{border-color:var(--accent);background:var(--accent-dim)}
+.promo-input-wrap{display:flex;align-items:center;gap:8px;margin-top:8px}
+.promo-suffix{font-size:.8rem;color:var(--text-muted);font-weight:600}
+
+/* ── DELIVERY MODULE ── */
+.delivery-box{
+  background:#141414;border:1px solid var(--border);border-radius:8px;
+  padding:16px;margin-top:16px;
+}
+
+/* ── DESIGNS MODULE ── */
+.designs-box{
+  background:#141414;border:1px solid var(--border);border-radius:8px;
+  padding:16px;margin-top:16px;
+}
+.designs-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+@media(max-width:500px){.designs-grid{grid-template-columns:1fr}}
+
+/* ── RESULTS DASHBOARD ── */
+.results-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:20px}
+.result-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;
+}
+.result-card:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.result-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+}
+.result-card.proveedor::before{background:linear-gradient(90deg,#E74C3C,#C0392B)}
+.result-card.ganancia::before{background:linear-gradient(90deg,#27AE60,#1E8449)}
+.result-card.cliente::before{background:linear-gradient(90deg,#2980B9,#1A5276)}
+.result-card.delivery::before{background:linear-gradient(90deg,var(--accent),#B7420A)}
+.result-card.total::before{background:linear-gradient(90deg,#8E44AD,#6C3483)}
+.result-card .rc-label{font-size:.63rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px}
+.result-card .rc-usd{font-size:2rem;font-weight:800;font-family:var(--mono);line-height:1}
+.result-card .rc-usd.proveedor-color{color:#E74C3C}
+.result-card .rc-usd.ganancia-color{color:#27AE60}
+.result-card .rc-usd.cliente-color{color:#3498DB}
+.result-card .rc-usd.delivery-color{color:var(--accent)}
+.result-card .rc-usd.total-color{color:#9B59B6}
+.result-card .rc-usd span{font-size:1rem;font-weight:500;color:var(--text-muted);margin-left:4px}
+
+/* ── BS CONVERSIONS ── */
+.bs-conversions{margin-top:12px;border-top:1px solid var(--border);padding-top:10px;display:flex;flex-direction:column;gap:5px}
+.bs-row{display:flex;justify-content:space-between;align-items:center}
+.bs-tag{font-size:.6rem;font-weight:700;letter-spacing:.8px;padding:2px 7px;border-radius:12px}
+.bs-tag.usd-tag{background:rgba(39,174,96,.12);color:#27AE60;border:1px solid rgba(39,174,96,.2)}
+.bs-tag.eur-tag{background:rgba(41,128,185,.12);color:#2980B9;border:1px solid rgba(41,128,185,.2)}
+.bs-tag.p2p-tag{background:rgba(243,156,18,.12);color:#F39C12;border:1px solid rgba(243,156,18,.2)}
+.bs-amount{font-size:.72rem;font-weight:600;font-family:var(--mono);color:var(--text-muted)}
+
+/* ── COLLAPSIBLE ── */
+.collapsible-body{overflow:hidden;transition:max-height .35s ease,opacity .3s ease;max-height:2000px;opacity:1}
+.collapsible-body.collapsed{max-height:0;opacity:0}
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;padding:20px;font-size:.68rem;color:var(--text-dim);
+  border-top:1px solid var(--border);letter-spacing:.5px;
+}
+
+/* ── UTILS ── */
+.flex-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.mt-4{margin-top:4px}.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-20{margin-top:20px}
+.w-full{width:100%}
+.text-accent{color:var(--accent)}
+.text-muted{color:var(--text-muted)}
+.mono{font-family:var(--mono)}
+.bold{font-weight:700}
+.divider{height:1px;background:var(--border);margin:20px 0}
+
+/* ── PULSE INDICATOR ── */
+.pulse{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--success);margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+
+/* ── TOOLTIP ── */
+[data-tip]{position:relative;cursor:help}
+[data-tip]::after{
+  content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+  background:#2a2a2a;color:var(--text);font-size:.68rem;padding:5px 10px;border-radius:6px;
+  white-space:nowrap;border:1px solid var(--border);opacity:0;pointer-events:none;transition:opacity .2s;z-index:200;
+}
+[data-tip]:hover::after{opacity:1}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  header{padding:16px;}
+  main{padding:16px 12px 40px}
+  .matrix-table th,.matrix-table td{padding:6px 6px}
+  .price-input{width:72px}
+  .rc-usd{font-size:1.5rem!important}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">C</div>
+    <div class="brand-text">
+      <h1>Calculadora Profesional para Revendedores</h1>
+      <small><span class="pulse"></span>Motor de Cotización Activo — Marca Blanca</small>
+    </div>
+  </div>
+  <div class="version-badge">v4.0</div>
+</header>
+
+<main>
+
+<!-- ══════════════════ PANEL CAMBIARIO ══════════════════ -->
+<div class="section-label">⚡ Panel Cambiario — Tasas de Referencia</div>
+<div class="card">
+  <div class="fx-grid">
+    <div class="fx-item">
+      <div class="fx-badge usd">BCV — USD → Bs.</div>
+      <label for="rateUSD">Tasa Oficial USD</label>
+      <div style="position:relative">
+        <span class="fx-prefix" style="margin-top:0;top:50%;transform:translateY(-50%)">$</span>
+        <input type="number" id="rateUSD" min="0" step="0.01" value="47.50" placeholder="47.50" oninput="recalc()"/>
+      </div>
+    </div>
+    <div class="fx-item">
+      <div class="fx-badge eur">BCV — EUR → Bs.</div>
+      <label for="rateEUR">Tasa Oficial EUR</label>
+      <div style="position:relative">
+        <span class="fx-prefix" style="margin-top:0;top:50%;transform:translateY(-50%)">€</span>
+        <input type="number" id="rateEUR" min="0" step="0.01" value="52.10" placeholder="52.10" oninput="recalc()"/>
+      </div>
+    </div>
+    <div class="fx-item">
+      <div class="fx-badge p2p">BINANCE P2P → Bs.</div>
+      <label for="rateP2P">Tasa Binance P2P</label>
+      <div style="position:relative">
+        <span class="fx-prefix" style="margin-top:0;top:50%;transform:translateY(-50%)">₮</span>
+        <input type="number" id="rateP2P" min="0" step="0.01" value="49.80" placeholder="49.80" oninput="recalc()"/>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ MATRIZ DE PRECIOS BASE ══════════════════ -->
+<div class="section-label">🗂 Panel de Configuración — Precios Base (USD)</div>
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><span>Tabla</span> Editable de Productos</div>
+    <div class="flex-row" style="gap:8px">
+      <button class="btn btn-secondary" onclick="addMatrixRow()" style="padding:7px 14px;font-size:.78rem">+ Agregar Fila</button>
+      <button class="collapse-btn" onclick="toggleSection('matrixBody','this')" id="matrixToggle">▲ Colapsar</button>
+    </div>
+  </div>
+  <div id="matrixBody" class="collapsible-body">
+    <p style="font-size:.75rem;color:var(--text-muted);margin-bottom:14px">Edita cualquier celda o agrega nuevas filas. Los cambios aplican al motor de cálculo de forma instantánea.</p>
+    <div class="matrix-wrap">
+      <table class="matrix-table" id="priceMatrix">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Producto</th>
+            <th class="col-prov" style="color:#E74C3C">Proveedor ($)</th>
+            <th class="col-detal" style="color:#27AE60">Detal ($)</th>
+            <th class="col-mayor" style="color:#3498DB">Mayor ($)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="matrixBody2"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ PANEL DE COTIZACIÓN ══════════════════ -->
+<div class="section-label">📋 Panel de Control — Cotización Dinámica</div>
+<div class="card">
+  <div class="card-header">
+    <div class="card-title"><span>Filas</span> de Cotización</div>
+    <div class="flex-row" style="gap:8px">
+      <button class="btn btn-secondary" onclick="addRow()" style="padding:7px 14px;font-size:.78rem">+ Agregar Fila</button>
+    </div>
+  </div>
+
+  <div style="overflow-x:auto">
+    <table class="quote-table" id="quoteTable">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Modo</th>
+          <th>Cant.</th>
+          <th style="color:#E74C3C">Proveedor</th>
+          <th style="color:#27AE60">Venta Unit.</th>
+          <th style="color:#27AE60">Subtotal Venta</th>
+          <th style="color:#E74C3C">Subtotal Costo</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="quoteRows"></tbody>
+    </table>
+  </div>
+
+  <!-- ── PROMO MODULE ── -->
+  <div class="promo-box">
+    <div class="flex-row" style="margin-bottom:10px">
+      <input type="checkbox" id="promoEnabled" onchange="togglePromo();recalc()"/>
+      <label for="promoEnabled" style="margin-bottom:0;cursor:pointer;font-size:.83rem;color:var(--text)">🏷 Módulo de Promociones <span style="color:var(--text-muted);font-size:.72rem">(afecta solo ingresos del revendedor)</span></label>
+    </div>
+    <div id="promoOptions" style="display:none">
+      <div class="promo-row">
+        <div class="promo-option" id="opt-pct" onclick="setPromoType('pct')" data-tip="Descuento porcentual sobre precio de venta">
+          <input type="radio" name="promoType" id="pt-pct" value="pct" checked style="accent-color:var(--accent)"/>
+          <label for="pt-pct" style="margin-bottom:0;cursor:pointer;font-size:.82rem">% Descuento</label>
+        </div>
+        <div class="promo-option" id="opt-fix" onclick="setPromoType('fix')" data-tip="Precio fijo de combo por unidad en USD">
+          <input type="radio" name="promoType" id="pt-fix" value="fix" style="accent-color:var(--accent)"/>
+          <label for="pt-fix" style="margin-bottom:0;cursor:pointer;font-size:.82rem">$ Precio Fijo / Unidad</label>
+        </div>
+      </div>
+      <div class="promo-input-wrap">
+        <div id="pct-wrap">
+          <label style="font-size:.72rem;margin-bottom:4px">Descuento (%)</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="promoDiscount" min="0" max="100" step="0.01" value="0" style="width:100px" oninput="recalc()"/>
+            <span class="promo-suffix">%</span>
+          </div>
+        </div>
+        <div id="fix-wrap" style="display:none">
+          <label style="font-size:.72rem;margin-bottom:4px">Precio Fijo / Unidad (USD)</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="number" id="promoFixed" min="0" step="0.01" value="0" style="width:100px" oninput="recalc()"/>
+            <span class="promo-suffix">$</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DELIVERY MODULE ── -->
+  <div class="delivery-box">
+    <label style="font-size:.8rem;color:var(--text);font-weight:600;margin-bottom:10px;display:block">🚚 Logística de Entrega</label>
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      <select id="deliveryType" onchange="toggleDelivery();recalc()" style="max-width:280px">
+        <option value="pickup">Pickup en Tienda — $0.00 USD</option>
+        <option value="avenida">Entrega en la Avenida — $1.00 USD fijo</option>
+        <option value="domicilio">Delivery a Domicilio — Costo Variable</option>
+      </select>
+      <div id="deliveryCustomWrap" style="display:none;align-items:center;gap:8px">
+        <label style="font-size:.75rem;margin-bottom:0;white-space:nowrap">Costo Delivery ($)</label>
+        <input type="number" id="deliveryCost" min="0" step="0.01" value="2.00" style="width:100px" oninput="recalc()"/>
+        <span style="font-size:.75rem;color:var(--text-muted)">USD</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DESIGNS MODULE ── -->
+  <div class="designs-box">
+    <label style="font-size:.8rem;color:var(--text);font-weight:600;margin-bottom:6px;display:block">🎨 Diseños Adicionales <span style="font-size:.7rem;color:var(--text-muted);font-weight:400">(se multiplican por cantidad total de prendas)</span></label>
+    <div class="designs-grid">
+      <div>
+        <label>Diseños Catálogo (+$0.60/u)</label>
+        <input type="number" id="designCatalog" min="0" step="1" value="0" placeholder="0" oninput="recalc()"/>
+      </div>
+      <div>
+        <label>Diseños Personalizados (+$0.75/u)</label>
+        <input type="number" id="designCustom" min="0" step="1" value="0" placeholder="0" oninput="recalc()"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BUTTONS ── -->
+  <div class="btn-row">
+    <button class="btn btn-danger" onclick="resetAll()">↺ Borrar y Reiniciar</button>
+  </div>
+</div>
+
+<!-- ══════════════════ TABLERO CONTABLE ══════════════════ -->
+<div class="section-label">💰 Tablero Contable — Resultados en Tiempo Real</div>
+<div class="results-grid">
+
+  <div class="result-card proveedor">
+    <div class="rc-label">① Monto a Pagar al Proveedor</div>
+    <div class="rc-usd proveedor-color" id="r-proveedor">$0.00<span>USD</span></div>
+    <div class="bs-conversions">
+      <div class="bs-row"><span class="bs-tag usd-tag">BCV-USD</span><span class="bs-amount" id="r-prov-usd">0,00 Bs.</span></div>
+      <div class="bs-row"><span class="bs-tag eur-tag">BCV-EUR</span><span class="bs-amount" id="r-prov-eur">0,00 Bs.</span></div>
+      <div class="bs-row"><span class="bs-tag p2p-tag">BINANCE</span><span class="bs-amount" id="r-prov-p2p">0,00 Bs.</span></div>
+    </div>
+  </div>
+
+  <div class="result-card ganancia">
+    <div class="rc-label">② Monto a Ganar como Revendedor</div>
+    <div class="rc-usd ganancia-color" id="r-ganancia">$0.00<span>USD</span></div>
+    <div class="bs-conversions">
+      <div class="bs-row"><span class="bs-tag usd-tag">BCV-USD</span><span class="bs-amount" id="r-gan-usd">0,00 Bs.</span></div>
+      <div class="bs-row"><span class="bs-tag eur-tag">BCV-EUR</span><span class="bs-amount" id="r-gan-eur">0,00 Bs.</span></div>
+      <div class="bs-row"><span class="bs-tag p2p-tag">BINANCE</span><span class="bs-amount" id="r-gan-p2p">0,00 Bs.</span></div>
+    </div>
+  </div>
+
+  <div class="result-card cliente">
+    <div class="rc-label">③ Monto a Pagar del Cliente (sin delivery)</div>
+    <div class="rc-usd cliente-color" id="r-cliente">$0.00<span>USD</span></div>
+    <div class="bs-conversions">
+      <div class="bs-row"><span class="bs-tag usd-tag">BCV-USD</span><span class="bs-amount" id="r-cli-usd">0,00 Bs.</span></div>
+      <div class="bs-row"><span class="bs-tag eur-tag">BCV-EUR</span><span class="bs-amount" id="r-cli-eur">0,00 Bs.</span></div>
+      <div class="bs-row"><span class="bs-tag p2p-tag">BINANCE</span><span class="bs-amount" id="r-cli-p2p">0,00 Bs.</span></div>
+    </div>
+  </div>
+
+  <div class="result-card delivery">
+    <div class="rc-label">④ Monto Cliente con Delivery</div>
+    <div class="rc-usd delivery-color" id="r-delivery">$0.00<span>USD</span></div>
+    <div class="bs-conversions">
+      <div class="bs-row"><span class="bs-tag usd-tag">BCV-USD</span><span class="bs-amount" id="r-del-usd">0,00 Bs.</span></div>
+      <div class="bs-row"><span class="bs-tag eur-tag">BCV-EUR</span><span class="bs-amount" id="r-del-eur">0,00 Bs.</span></div>
+      <div class="bs-row"><span class="bs-tag p2p-tag">BINANCE</span><span class="bs-amount" id="r-del-p2p">0,00 Bs.</span></div>
+    </div>
+  </div>
+
+  <div class="result-card total">
+    <div class="rc-label">⑤ Gran Total — Cliente con Diseños</div>
+    <div class="rc-usd total-color" id="r-total">$0.00<span>USD</span></div>
+    <div class="bs-conversions">
+      <div class="bs-row"><span class="bs-tag usd-tag">BCV-USD</span><span class="bs-amount" id="r-tot-usd">0,00 Bs.</span></div>
+      <div class="bs-row"><span class="bs-tag eur-tag">BCV-EUR</span><span class="bs-amount" id="r-tot-eur">0,00 Bs.</span></div>
+      <div class="bs-row"><span class="bs-tag p2p-tag">BINANCE</span><span class="bs-amount" id="r-tot-p2p">0,00 Bs.</span></div>
+    </div>
+  </div>
+
+</div>
+
+</main>
+
+<footer>
+  Calculadora Profesional para Revendedores v4.0 — Marca Blanca — Motor Multicambiario (BCV-USD · BCV-EUR · Binance P2P)
+</footer>
+<footer style="text-align:center;font-size:11px;color:#666666;margin-top:40px;padding:16px;border-top:1px solid #2D2D2D">
+  Desarrollado por <strong style="color:#888">Landirianos Site</strong> | CEO Fundador: Terry Romero | Contacto: <a href="mailto:landirianositeoficial@gmail.com" style="color:#D35400;text-decoration:none;">landirianositeoficial@gmail.com</a>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   BASE DE DATOS DE PRODUCTOS (defaults inmutables)
+════════════════════════════════════════════════════ */
+const DEFAULT_PRODUCTS = [
+  {name:'Unicolor',                            prov:2.96, detal:5.00, mayor:2.96},
+  {name:'Sublimado Catálogo',                  prov:4.20, detal:6.00, mayor:4.20},
+  {name:'Sublimado Personalizado',             prov:4.90, detal:6.50, mayor:4.90},
+  {name:'2XXL/3XXL Unicolor',                  prov:5.50, detal:6.00, mayor:5.50},
+  {name:'2XXL/3XXL Sublimado Catálogo',        prov:5.90, detal:7.00, mayor:5.90},
+  {name:'2XXL/3XXL Sublimado Personalizado',   prov:6.80, detal:8.00, mayor:6.80},
+  {name:'Microdurazno con DTF Catálogo',       prov:6.34, detal:7.00, mayor:6.34},
+  {name:'Microdurazno con DTF Personalizado',  prov:6.34, detal:7.00, mayor:6.34},
+  {name:'Unicolor / Algodón',                  prov:7.40, detal:8.00, mayor:7.40},
+];
+
+/* Copia mutable de trabajo */
+let products = DEFAULT_PRODUCTS.map(p=>({...p}));
+
+/* ═══════════════════════════════════════════════════
+   HELPERS NUMÉRICOS Y DE FORMATO
+════════════════════════════════════════════════════ */
+const safeNum = v => parseFloat(v) || 0;
+
+function fmtUSD(v){
+  return '$' + v.toFixed(2);
+}
+
+function fmtBs(v){
+  // Formato: punto para miles, coma para decimales
+  const parts = v.toFixed(2).split('.');
+  parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  return parts.join(',') + ' Bs.';
+}
+
+/* Obtener tasas vigentes */
+function getRates(){
+  return {
+    usd: safeNum(document.getElementById('rateUSD').value),
+    eur: safeNum(document.getElementById('rateEUR').value),
+    p2p: safeNum(document.getElementById('rateP2P').value),
+  };
+}
+
+/* ═══════════════════════════════════════════════════
+   RENDER MATRIZ DE PRECIOS BASE
+════════════════════════════════════════════════════ */
+function renderMatrix(){
+  const tbody = document.getElementById('matrixBody2');
+  tbody.innerHTML = '';
+  products.forEach((p,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--text-muted);font-size:.72rem;font-weight:700">${i+1}</td>
+      <td class="prod-name">
+        <input class="price-input" type="text"
+               value="${p.name}"
+               id="mp-name-${i}" onchange="updateProductName(${i},this.value)"
+               style="width:160px;color:var(--text)"/>
+      </td>
+      <td class="col-prov">
+        <input class="price-input" type="number" min="0" step="0.01"
+               value="${p.prov.toFixed(2)}"
+               id="mp-prov-${i}" onchange="updatePrice(${i},'prov',this.value)"/>
+      </td>
+      <td class="col-detal">
+        <input class="price-input" type="number" min="0" step="0.01"
+               value="${p.detal.toFixed(2)}"
+               id="mp-detal-${i}" onchange="updatePrice(${i},'detal',this.value)"/>
+      </td>
+      <td class="col-mayor">
+        <input class="price-input" type="number" min="0" step="0.01"
+               value="${p.mayor.toFixed(2)}"
+               id="mp-mayor-${i}" onchange="updatePrice(${i},'mayor',this.value)"/>
+      </td>
+      <td>
+        <button class="btn-icon del" onclick="removeMatrixRow(${i})" title="Eliminar producto"
+                style="${products.length===1?'opacity:.35;pointer-events:none':''}">✕</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function updatePrice(idx, field, val){
+  products[idx][field] = safeNum(val) || 0;
+  /* Actualizar selects existentes en filas de cotización */
+  refreshRowOptions();
+  recalc();
+}
+
+function updateProductName(idx, val){
+  products[idx].name = val.trim() || `Producto ${idx+1}`;
+  refreshRowOptions();
+}
+
+function addMatrixRow(){
+  products.push({name:`Nuevo Producto ${products.length+1}`, prov:0, detal:0, mayor:0});
+  renderMatrix();
+  refreshRowOptions();
+  recalc();
+}
+
+function removeMatrixRow(idx){
+  if(products.length <= 1) return; /* Siempre dejar al menos 1 */
+  products.splice(idx, 1);
+  /* Corregir referencias en filas de cotización */
+  rows.forEach(row=>{
+    if(row.prodIdx >= products.length) row.prodIdx = products.length - 1;
+  });
+  renderMatrix();
+  refreshRowOptions();
+  recalc();
+}
+
+/* ═══════════════════════════════════════════════════
+   GESTIÓN DE FILAS DE COTIZACIÓN
+════════════════════════════════════════════════════ */
+let rowCount = 0;
+const rows = []; /* {id, prodIdx, mode, qty} */
+
+function addRow(cloneData){
+  const id = ++rowCount;
+  const data = cloneData || {prodIdx:0, mode:'detal', qty:1};
+  rows.push({id, ...data});
+  renderRows();
+  recalc();
+}
+
+function removeRow(id){
+  const idx = rows.findIndex(r=>r.id===id);
+  if(idx>-1) rows.splice(idx,1);
+  renderRows();
+  recalc();
+}
+
+function cloneRow(id){
+  const r = rows.find(r=>r.id===id);
+  if(r) addRow({prodIdx:r.prodIdx, mode:r.mode, qty:r.qty});
+}
+
+function renderRows(){
+  const tbody = document.getElementById('quoteRows');
+  tbody.innerHTML = '';
+
+  if(rows.length===0){
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td colspan="8" style="text-align:center;color:var(--text-dim);padding:24px;font-size:.82rem">
+      Sin prendas cotizadas — Haz clic en "+ Agregar Fila"</td>`;
+    tbody.appendChild(tr);
+    return;
+  }
+
+  rows.forEach(row=>{
+    const p = products[row.prodIdx];
+    const unitSale  = row.mode==='detal' ? p.detal : p.mayor;
+    const subtSale  = unitSale * row.qty;
+    const subtCost  = p.prov   * row.qty;
+
+    const tr = document.createElement('tr');
+    tr.id = `qr-${row.id}`;
+
+    /* Build product options */
+    const opts = products.map((pr,i)=>
+      `<option value="${i}" ${i===row.prodIdx?'selected':''}>${pr.name}</option>`
+    ).join('');
+
+    tr.innerHTML = `
+      <td>
+        <select class="q-select" onchange="rowChange(${row.id},'prod',this.value)">${opts}</select>
+      </td>
+      <td>
+        <select class="q-select" style="min-width:90px" onchange="rowChange(${row.id},'mode',this.value)">
+          <option value="detal"  ${row.mode==='detal' ?'selected':''}>Detal</option>
+          <option value="mayor"  ${row.mode==='mayor' ?'selected':''}>Mayor</option>
+        </select>
+      </td>
+      <td>
+        <input class="q-input-sm" type="number" min="1" step="1" value="${row.qty}"
+               onchange="rowChange(${row.id},'qty',this.value)"/>
+      </td>
+      <td style="color:#E74C3C;font-family:var(--mono);font-size:.82rem">$${p.prov.toFixed(2)}</td>
+      <td style="color:#27AE60;font-family:var(--mono);font-size:.82rem">$${unitSale.toFixed(2)}</td>
+      <td style="color:#27AE60;font-family:var(--mono);font-weight:700">$${subtSale.toFixed(2)}</td>
+      <td style="color:#E74C3C;font-family:var(--mono);font-weight:700">$${subtCost.toFixed(2)}</td>
+      <td>
+        <div style="display:flex;gap:5px">
+          <button class="btn-icon clone" onclick="cloneRow(${row.id})" title="Clonar fila">⧉</button>
+          <button class="btn-icon del"   onclick="removeRow(${row.id})" title="Eliminar fila">✕</button>
+        </div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function rowChange(id, field, val){
+  const row = rows.find(r=>r.id===id);
+  if(!row) return;
+  if(field==='prod') row.prodIdx = parseInt(val)||0;
+  if(field==='mode') row.mode = val;
+  if(field==='qty')  row.qty  = Math.max(1, parseInt(val)||1);
+  renderRows();
+  recalc();
+}
+
+function refreshRowOptions(){
+  rows.forEach(row=> row.prodIdx = Math.min(row.prodIdx, products.length-1));
+  renderRows();
+}
+
+/* ═══════════════════════════════════════════════════
+   PROMO MODULE
+════════════════════════════════════════════════════ */
+function togglePromo(){
+  const enabled = document.getElementById('promoEnabled').checked;
+  document.getElementById('promoOptions').style.display = enabled ? 'block' : 'none';
+}
+
+function setPromoType(type){
+  document.getElementById('pt-'+type).checked = true;
+  document.getElementById('pct-wrap').style.display = type==='pct' ? 'block' : 'none';
+  document.getElementById('fix-wrap').style.display = type==='fix' ? 'block' : 'none';
+  document.getElementById('opt-pct').classList.toggle('active', type==='pct');
+  document.getElementById('opt-fix').classList.toggle('active', type==='fix');
+  recalc();
+}
+
+function getPromoMultiplier(baseClienteUSD, totalQty){
+  if(!document.getElementById('promoEnabled').checked) return baseClienteUSD;
+  const type = document.querySelector('input[name="promoType"]:checked')?.value || 'pct';
+  if(type==='pct'){
+    const disc = Math.min(100, Math.max(0, safeNum(document.getElementById('promoDiscount').value)));
+    return baseClienteUSD * (1 - disc/100);
+  } else {
+    const fixedUnit = safeNum(document.getElementById('promoFixed').value);
+    return fixedUnit * totalQty;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   DELIVERY
+════════════════════════════════════════════════════ */
+function toggleDelivery(){
+  const type = document.getElementById('deliveryType').value;
+  const wrap = document.getElementById('deliveryCustomWrap');
+  wrap.style.display = type==='domicilio' ? 'flex' : 'none';
+}
+
+function getDeliveryCost(){
+  const type = document.getElementById('deliveryType').value;
+  if(type==='pickup')    return 0;
+  if(type==='avenida')   return 1.00;
+  if(type==='domicilio') return safeNum(document.getElementById('deliveryCost').value);
+  return 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   MOTOR DE CÁLCULO PRINCIPAL
+════════════════════════════════════════════════════ */
+function recalc(){
+  /* Totales brutos de filas */
+  let totalCostProv = 0;
+  let totalVentaBruta = 0;
+  let totalQty = 0;
+
+  rows.forEach(row=>{
+    const p = products[row.prodIdx];
+    const qty = row.qty;
+    totalQty  += qty;
+    totalCostProv   += p.prov  * qty;
+    const unitSale   = row.mode==='detal' ? p.detal : p.mayor;
+    totalVentaBruta += unitSale * qty;
+  });
+
+  /* Aplicar promo (afecta solo ingresos del revendedor) */
+  const clienteBase = getPromoMultiplier(totalVentaBruta, totalQty);
+
+  /* Diseños adicionales (suman al cobro del cliente) */
+  const dCatalog = safeNum(document.getElementById('designCatalog').value);
+  const dCustom  = safeNum(document.getElementById('designCustom').value);
+  const designExtra = (dCatalog * 0.60 + dCustom * 0.75) * totalQty;
+
+  /* Delivery (pass-through: cobra cliente, no afecta margen) */
+  const delivery = getDeliveryCost();
+
+  /* ── Resultados ── */
+  const r_proveedor = totalCostProv;                         // ① Deuda neta con taller
+  const r_ganancia  = clienteBase - totalCostProv;           // ② Margen neto libre de delivery
+  const r_cliente   = clienteBase;                           // ③ Solo pedido, sin delivery ni diseños
+  const r_delivery  = clienteBase + delivery;                // ④ Con delivery
+  const r_total     = clienteBase + delivery + designExtra;  // ⑤ Gran total
+
+  /* ── Tasas ── */
+  const {usd, eur, p2p} = getRates();
+
+  /* ── Pintar resultados ── */
+  setResult('r-proveedor','r-prov', r_proveedor, usd, eur, p2p, 'proveedor-color');
+  setResult('r-ganancia', 'r-gan',  r_ganancia,  usd, eur, p2p, 'ganancia-color');
+  setResult('r-cliente',  'r-cli',  r_cliente,   usd, eur, p2p, 'cliente-color');
+  setResult('r-delivery', 'r-del',  r_delivery,  usd, eur, p2p, 'delivery-color');
+  setResult('r-total',    'r-tot',  r_total,      usd, eur, p2p, 'total-color');
+}
+
+function setResult(mainId, bsPrefix, usdVal, rUSD, rEUR, rP2P, cls){
+  const el = document.getElementById(mainId);
+  el.innerHTML = `${fmtUSD(usdVal)}<span>USD</span>`;
+  document.getElementById(bsPrefix+'-usd').textContent = fmtBs(usdVal * rUSD);
+  document.getElementById(bsPrefix+'-eur').textContent = fmtBs(usdVal * rEUR);
+  document.getElementById(bsPrefix+'-p2p').textContent = fmtBs(usdVal * rP2P);
+}
+
+/* ═══════════════════════════════════════════════════
+   RESET CONTROLADO
+════════════════════════════════════════════════════ */
+function resetAll(){
+  /* Tasas — conservar valores actuales (no resetear) */
+  /* Promo */
+  document.getElementById('promoEnabled').checked = false;
+  document.getElementById('promoOptions').style.display = 'none';
+  document.getElementById('promoDiscount').value = 0;
+  document.getElementById('promoFixed').value    = 0;
+  /* Delivery */
+  document.getElementById('deliveryType').value = 'pickup';
+  document.getElementById('deliveryCustomWrap').style.display = 'none';
+  document.getElementById('deliveryCost').value = 2.00;
+  /* Diseños */
+  document.getElementById('designCatalog').value = 0;
+  document.getElementById('designCustom').value  = 0;
+  /* Filas */
+  rows.length = 0;
+  rowCount = 0;
+  renderRows();
+  recalc();
+}
+
+/* ═══════════════════════════════════════════════════
+   COLAPSAR SECCIÓN
+════════════════════════════════════════════════════ */
+function toggleSection(bodyId, btn){
+  const body = document.getElementById(bodyId);
+  const isCollapsed = body.classList.toggle('collapsed');
+  const btnEl = document.getElementById('matrixToggle');
+  btnEl.textContent = isCollapsed ? '▼ Expandir' : '▲ Colapsar';
+}
+
+/* ═══════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  renderMatrix();
+  addRow(); /* Fila inicial */
+  setPromoType('pct');
+  recalc();
+});
+</script>
+</body>
+</html>
